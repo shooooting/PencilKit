@@ -10,7 +10,7 @@ import PencilKit
 import SnapKit
 import PhotosUI
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, PKToolPickerObserver {
     
     private let canvas = PKCanvasView()
     
@@ -18,49 +18,47 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.addSubview(canvas)
+        setCanvas()
         setConstraint()
-        canvas.drawing = drawing
-//        setNavi()
     }
-    
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//
-//        setToolKit()
-//    }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
         setToolKit()
     }
     
     private func setConstraint() {
         canvas.snp.makeConstraints {
             $0.top.leading.trailing.bottom.equalToSuperview()
+//            $0.top.equalTo(view.safeAreaLayoutGuide.snp.topMargin)
+        }
+    }
+    
+    private func setCanvas() {
+        if #available(iOS 14.0, *) {
+            view.addSubview(canvas)
+            canvas.backgroundColor = .systemGreen
+            canvas.drawingPolicy = .anyInput
+        } else {
+            view.addSubview(canvas)
+            canvas.backgroundColor = .systemGreen
+            canvas.allowsFingerDrawing = true
         }
     }
     
     private func setToolKit() {
-//        guard let window = view.window,
-//            let toolPicker = PKToolPicker.shared(for: window) else { return }
-//        toolPicker.setVisible(true, forFirstResponder: canvas)
-//        toolPicker.addObserver(canvas)
-//        canvas.becomeFirstResponder()
-//        canvas.resignFirstResponder()
-//        canvas.becomeFirstResponder()
         
         if #available(iOS 14.0, *) {
-            let tool = PKToolPicker.init()
-            tool.setVisible(true, forFirstResponder: canvas)
-            tool.addObserver(canvas)
+            guard let window = view.window,
+                  let toolPicker = PKToolPicker.shared(for: window) else { return }
+            toolPicker.setVisible(true, forFirstResponder: canvas)
+            toolPicker.addObserver(canvas)
+            canvas.becomeFirstResponder()
+            canvas.resignFirstResponder()
             canvas.becomeFirstResponder()
         } else {
-            // Fallback on earlier versions
             guard let window = view.window,
-                let toolPicker = PKToolPicker.shared(for: window) else { return }
+                  let toolPicker = PKToolPicker.shared(for: window) else { return }
             toolPicker.setVisible(true, forFirstResponder: canvas)
             toolPicker.addObserver(canvas)
             canvas.becomeFirstResponder()
